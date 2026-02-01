@@ -17,8 +17,8 @@ def get_file_content(working_directory, file_path):
             file_content_string = f.read(MAX_CHARS)
             # After reading the first MAX_CHARS...
             if f.read(1):
-                content += f'[...File "{file_path}" truncated at {MAX_CHARS} characters]'
-            return file_content_string
+                file_content_string += f'[...File "{file_path}" truncated at {MAX_CHARS} characters]'
+        return file_content_string
             
     except Exception as e:
         print(f"Exception occurred: {e}")
