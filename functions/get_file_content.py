@@ -1,40 +1,44 @@
 import os
 from google.genai import types
+from config import MAX_CHARS
+
 
 def get_file_content(working_directory, file_path):
-    
     try:
         abs_working_dir = os.path.abspath(working_directory)
         target_path = os.path.normpath(os.path.join(abs_working_dir, file_path))
-        
+
         if os.path.commonpath([abs_working_dir, target_path]) != abs_working_dir:
             return f'Error: Cannot read "{file_path}" as it is outside the permitted working directory'
         if not os.path.isfile(target_path):
             return f'Error: "{file_path}" is a directory, not a file'
-        
-        MAX_CHARS = 10000
+
         print(f"Reading file: {target_path}")
-        with open(target_path, "r") as f: 
+        with open(target_path, "r") as f:
             file_content_string = f.read(MAX_CHARS)
             # After reading the first MAX_CHARS...
             if f.read(1):
-                file_content_string += f'[...File "{file_path}" truncated at {MAX_CHARS} characters]'
+                file_content_string += (
+                    f'[...File "{file_path}" truncated at {MAX_CHARS} characters]'
+                )
         return file_content_string
-            
+
     except Exception as e:
         print(f"Exception occurred: {e}")
         return f"Error reading file: {e}"
-    
+
+
 schema_get_files_content = types.FunctionDeclaration(
     name="get_file_content",
-    description="Reads the content of a specified file relative to the working directory, truncating if necessary",
+    description=f"Retrieves the content (at most {MAX_CHARS} characters) of a specified file within the working directory",
     parameters=types.Schema(
         type=types.Type.OBJECT,
         properties={
-            "directory": types.Schema(
+            "file_path": types.Schema(
                 type=types.Type.STRING,
-                description="File path to read from, relative to the working directory",
+                description="Path to the file to read, relative to the working directory",
             ),
         },
+        required=["file_path"],
     ),
 )
